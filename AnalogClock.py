@@ -6,13 +6,18 @@ import math
 class AnalogClock(QtGui.QWidget):
 	def __init__(self,parent,width=400):
 		QtGui.QWidget.__init__(self,parent)
-		self.resize(QtCore.QSize(width,width))
 		self.thickPen=QtGui.QPen(QtGui.QColor(0x000000),3,QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin)
 		self.thinPen=QtGui.QPen(QtGui.QColor(0x000000),1,QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin)
 		self.penHour=QtGui.QPen(QtGui.QColor(0x0000ff),6,QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin)
 		self.penMinute=QtGui.QPen(QtGui.QColor(0x0000ff),3,QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin)
 		self.penSecond=QtGui.QPen(QtGui.QColor(0xff0000),1,QtCore.Qt.SolidLine, QtCore.Qt.RoundCap, QtCore.Qt.RoundJoin)
-		self.radius=width/2
+		self.clock = QtCore.QTimer()
+		self.clock.timeout.connect(self.updateClock)
+		self.resize(QtCore.QSize(width,width))
+
+	def resizeEvent(self,e):
+		self.clock.stop()
+		self.radius=min(e.size().width(),e.size().height())/2
 		self.minorTicks=[]
 		self.innerTicks=[]
 		self.outerTicks=[]
@@ -26,8 +31,6 @@ class AnalogClock(QtGui.QWidget):
 			self.innerTicks.append((self.radius+self.radius*dx/2,self.radius-self.radius*dy/2))
 			t-=dt
 		self.getCurrentTime()
-		self.clock = QtCore.QTimer()
-		self.clock.timeout.connect(self.updateClock)
 		self.clock.start(1000)
 		self.update()
 
@@ -53,7 +56,8 @@ class AnalogClock(QtGui.QWidget):
 	def paintEvent(self,event):
 		painter = QtGui.QPainter(self)
 		painter.setPen(self.thickPen)
-		painter.drawEllipse(self.rect())
+		#painter.drawEllipse(self.rect())
+		painter.drawEllipse(0,0,self.radius*2,self.radius*2)
 		painter.setPen(self.penHour)
 		painter.drawLine(self.radius,self.radius,self.innerTicks[self.hourTicks][0],self.innerTicks[self.hourTicks][1])
 		painter.setPen(self.penMinute)
@@ -69,7 +73,9 @@ class AnalogClock(QtGui.QWidget):
 
 if __name__=='__main__':
 	app=QtGui.QApplication([])
-	g = AnalogClock(None,100)
+	g = AnalogClock(None)
+	g.move(0,0)
+	g.resize(200,200)
 	g.setWindowTitle('Analog Clock')
 	g.show()
 	app.exec_()
