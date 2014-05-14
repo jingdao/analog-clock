@@ -15,4 +15,6 @@ embed in another PyQt application:
 
 	from AnalogClock import AnalogClock
 	g = AnalogClock(parent,size)
+	g.move(x,y)
+	g.resize(width,height)
 	g.show()
